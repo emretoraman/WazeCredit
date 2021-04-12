@@ -11,22 +11,10 @@ namespace WazeCredit.Controllers
     public class HomeController : Controller
     {
         private readonly IMarketForecaster _marketForecaster;
-        private readonly WazeForecastSettings _wazeForecastSettings;
-        private readonly StripeSettings _stripeSettings;
-        private readonly TwilioSettings _twilioSettings;
-        private readonly SendGridSettings _sendGridSettings;
 
-        public HomeController(IMarketForecaster marketForecaster, 
-            IOptions<WazeForecastSettings> wazeForecastSettings,
-            IOptions<StripeSettings> stripeSettings,
-            IOptions<TwilioSettings> twilioSettings,
-            IOptions<SendGridSettings> sendGridSettings)
+        public HomeController(IMarketForecaster marketForecaster)
         {
             _marketForecaster = marketForecaster;
-            _wazeForecastSettings = wazeForecastSettings.Value;
-            _stripeSettings = stripeSettings.Value;
-            _twilioSettings = twilioSettings.Value;
-            _sendGridSettings = sendGridSettings.Value;
         }
 
         public IActionResult Index()
@@ -37,17 +25,21 @@ namespace WazeCredit.Controllers
             return View(homeVM);
         }
 
-        public IActionResult AppSettings()
+        public IActionResult AppSettings(
+            [FromServices] IOptions<WazeForecastSettings> wazeForecastSettings,
+            [FromServices] IOptions<StripeSettings> stripeSettings,
+            [FromServices] IOptions<TwilioSettings> twilioSettings,
+            [FromServices] IOptions<SendGridSettings> sendGridSettings)
         {
             List<string> settings = new List<string>
             {
-                $"WazeForecast.{nameof(WazeForecastSettings.ForecastTrackerEnabled)}: {_wazeForecastSettings.ForecastTrackerEnabled}",
-                $"Stripe.{nameof(StripeSettings.SecretKey)}: {_stripeSettings.SecretKey}",
-                $"Stripe.{nameof(StripeSettings.PublishableKey)}: {_stripeSettings.PublishableKey}",
-                $"Twilio.{nameof(TwilioSettings.PhoneNumber)}: {_twilioSettings.PhoneNumber}",
-                $"Twilio.{nameof(TwilioSettings.AuthToken)}: {_twilioSettings.AuthToken}",
-                $"Twilio.{nameof(TwilioSettings.AccountSid)}: {_twilioSettings.AccountSid}",
-                $"SendGrid.{nameof(SendGridSettings.SendGridKey)}: {_sendGridSettings.SendGridKey}"
+                $"WazeForecast.{nameof(WazeForecastSettings.ForecastTrackerEnabled)}: {wazeForecastSettings.Value.ForecastTrackerEnabled}",
+                $"Stripe.{nameof(StripeSettings.SecretKey)}: {stripeSettings.Value.SecretKey}",
+                $"Stripe.{nameof(StripeSettings.PublishableKey)}: {stripeSettings.Value.PublishableKey}",
+                $"Twilio.{nameof(TwilioSettings.PhoneNumber)}: {twilioSettings.Value.PhoneNumber}",
+                $"Twilio.{nameof(TwilioSettings.AuthToken)}: {twilioSettings.Value.AuthToken}",
+                $"Twilio.{nameof(TwilioSettings.AccountSid)}: {twilioSettings.Value.AccountSid}",
+                $"SendGrid.{nameof(SendGridSettings.SendGridKey)}: {sendGridSettings.Value.SendGridKey}"
             };
 
             return View(settings);
