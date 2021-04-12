@@ -6,7 +6,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using WazeCredit.Data;
+using WazeCredit.Middleware;
 using WazeCredit.Services;
+using WazeCredit.Services.Lifetime;
 using WazeCredit.Utility;
 
 namespace WazeCredit
@@ -30,6 +32,9 @@ namespace WazeCredit
 
             services.AddTransient<IMarketForecaster, MarketForecaster>();
             services.AddAppSettings(Configuration);
+            services.AddTransient<TransientService>();
+            services.AddScoped<ScopedService>();
+            services.AddSingleton<SingletonService>();
 
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -57,6 +62,7 @@ namespace WazeCredit
 
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseMiddleware<CustomMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {

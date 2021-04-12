@@ -1,0 +1,27 @@
+﻿@model List<String>
+
+<h1>Lifetime of Services</h1>
+@for (var i = 0; i < Model.Count; i++)
+{
+    if (i == 0)
+    {
+        <div style="font-size:20px;padding-top:20px;">
+            Transient Lifetime will be different for every request!
+        </div>
+    }
+    if (i == 2)
+    {
+        <div style="font-size:20px;padding-top:20px;">
+            Scoped Lifetime will be different when you refresh!
+        </div>
+    }
+    if (i == 4)
+    {
+        <div style="font-size:20px;padding-top:20px;">
+            Singleton Lifetime will be same for your application! It changes when the application restarts!
+        </div>
+    }
+    <div>
+        @Model[i]
+    </div>
+}
