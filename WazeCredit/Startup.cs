@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using WazeCredit.Data;
 using WazeCredit.Services;
-using WazeCredit.Utility.AppSettings;
+using WazeCredit.Utility;
 
 namespace WazeCredit
 {
@@ -29,11 +29,7 @@ namespace WazeCredit
             services.AddDatabaseDeveloperPageExceptionFilter();
 
             services.AddTransient<IMarketForecaster, MarketForecaster>();
-
-            services.Configure<WazeForecastSettings>(Configuration.GetSection("WazeForecast"));
-            services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
-            services.Configure<TwilioSettings>(Configuration.GetSection("Twilio"));
-            services.Configure<SendGridSettings>(Configuration.GetSection("SendGrid"));
+            services.AddAppSettings(Configuration);
 
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
