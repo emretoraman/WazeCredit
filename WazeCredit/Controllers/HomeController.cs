@@ -7,11 +7,16 @@ namespace WazeCredit.Controllers
 {
     public class HomeController : Controller
     {
+        private IMarketForecaster _marketForecaster;
+
+        public HomeController(IMarketForecaster marketForecaster)
+        {
+            _marketForecaster = marketForecaster;
+        }
+
         public IActionResult Index()
         {
-            var marketForecaster = new MarketForecaster();
-            //var marketForecaster = new MarketForecasterV2();
-            var marketCondition = marketForecaster.GetMarketPrediction().MarketCondition.ToString();
+            var marketCondition = _marketForecaster.GetMarketPrediction().MarketCondition.ToString();
 
             var homeVM = new HomeViewModel { MarketForecast = $"Market is {marketCondition}" };
             return View(homeVM);
