@@ -1,26 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using WazeCredit.Models;
+using WazeCredit.Models.ViewModels;
+using WazeCredit.Services;
 
 namespace WazeCredit.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
-
         public IActionResult Index()
         {
-            return View();
+            var marketForecaster = new MarketForecaster();
+            //var marketForecaster = new MarketForecasterV2();
+            var marketCondition = marketForecaster.GetMarketPrediction().MarketCondition.ToString();
+
+            var homeVM = new HomeViewModel { MarketForecast = $"Market is {marketCondition}" };
+            return View(homeVM);
         }
 
         public IActionResult Privacy()

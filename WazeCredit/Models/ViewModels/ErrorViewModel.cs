@@ -1,6 +1,4 @@
-using System;
-
-namespace WazeCredit.Models
+namespace WazeCredit.Models.ViewModels
 {
     public class ErrorViewModel
     {
