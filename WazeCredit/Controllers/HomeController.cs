@@ -12,13 +12,15 @@ namespace WazeCredit.Controllers
     public class HomeController : Controller
     {
         private readonly IMarketForecaster _marketForecaster;
+        private readonly ICreditValidator _creditValidator;
         
         [BindProperty]
         public CreditApplication CreditApplicationModel { get; set; }
 
-        public HomeController(IMarketForecaster marketForecaster)
+        public HomeController(IMarketForecaster marketForecaster, ICreditValidator creditValidator)
         {
             _marketForecaster = marketForecaster;
+            _creditValidator = creditValidator;
         }
 
         public IActionResult Index()
@@ -53,6 +55,35 @@ namespace WazeCredit.Controllers
         {
             CreditApplicationModel = new CreditApplication();
             return View(CreditApplicationModel);
+        }
+
+        [ValidateAntiForgeryToken]
+        [HttpPost]
+        [ActionName("CreditApplication")]
+        public IActionResult CreditApplicationPOST()
+        {
+            if (ModelState.IsValid)
+            {
+                var (validationPassed, errorMessages) = _creditValidator.PassAllValidations(CreditApplicationModel);
+                var creditResult = new CreditResult
+                {
+                    ErrorList = errorMessages,
+                    CreditID = 0,
+                    Success = validationPassed
+                };
+
+                if (validationPassed)
+                {
+                    //todo: Add to DB
+                }
+                return RedirectToAction(nameof(CreditResult), creditResult);
+            }
+            return View(CreditApplicationModel);
+        }
+
+        public IActionResult CreditResult(CreditResult creditResult)
+        {
+            return View(creditResult);
         }
 
         public IActionResult Privacy()

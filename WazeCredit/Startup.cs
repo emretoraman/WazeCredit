@@ -30,6 +30,10 @@ namespace WazeCredit
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddDatabaseDeveloperPageExceptionFilter();
 
+            services.AddScoped<IValidationChecker, AddressValidationChecker>();
+            services.AddScoped<IValidationChecker, CreditValidationChecker>();
+            services.AddScoped<ICreditValidator, CreditValidator>();
+
             services.AddTransient<IMarketForecaster, MarketForecaster>();
             services.AddAppSettings(Configuration);
             services.AddTransient<TransientService>();
