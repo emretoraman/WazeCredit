@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Diagnostics;
+using WazeCredit.Models;
 using WazeCredit.Models.ViewModels;
 using WazeCredit.Services;
 using WazeCredit.Utility.AppSettings;
@@ -11,6 +12,9 @@ namespace WazeCredit.Controllers
     public class HomeController : Controller
     {
         private readonly IMarketForecaster _marketForecaster;
+        
+        [BindProperty]
+        public CreditApplication CreditApplicationModel { get; set; }
 
         public HomeController(IMarketForecaster marketForecaster)
         {
@@ -43,6 +47,12 @@ namespace WazeCredit.Controllers
             };
 
             return View(settings);
+        }
+
+        public IActionResult CreditApplication()
+        {
+            CreditApplicationModel = new CreditApplication();
+            return View(CreditApplicationModel);
         }
 
         public IActionResult Privacy()
