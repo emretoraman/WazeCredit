@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using WazeCredit.Data;
+using WazeCredit.Data.Repository.Interfaces;
 using WazeCredit.Models;
 using WazeCredit.Models.ViewModels;
 using WazeCredit.Services;
@@ -16,21 +17,21 @@ namespace WazeCredit.Controllers
     {
         private readonly IMarketForecaster _marketForecaster;
         private readonly ICreditValidator _creditValidator;
-        private readonly ApplicationDbContext _dbContext;
         private readonly ILogger _logger;
+        private readonly IUnitOfWork _unitOfWork;
         
         [BindProperty]
         public CreditApplication CreditApplication { get; set; }
 
         public HomeController(IMarketForecaster marketForecaster, 
-            ICreditValidator creditValidator, 
-            ApplicationDbContext dbContext,
-            ILogger<HomeController> logger)
+            ICreditValidator creditValidator,
+            ILogger<HomeController> logger,
+            IUnitOfWork unitOfWork)
         {
             _marketForecaster = marketForecaster;
             _creditValidator = creditValidator;
-            _dbContext = dbContext;
             _logger = logger;
+            _unitOfWork = unitOfWork;
         }
 
         public IActionResult Index()
@@ -91,8 +92,8 @@ namespace WazeCredit.Controllers
                     var creditApprovedEnum = CreditApplication.Salary > 50000 ? CreditApprovedEnum.High : CreditApprovedEnum.Low;
                     CreditApplication.CreditApproved = creditService(creditApprovedEnum).GetCreditApproved(CreditApplication);
 
-                    _dbContext.Add(CreditApplication);
-                    _dbContext.SaveChanges();
+                    _unitOfWork.CreditApplicationRepository.Add(CreditApplication);
+                    _unitOfWork.Save();
                     creditResult.CreditID = CreditApplication.Id;
                     creditResult.CreditApproved = CreditApplication.CreditApproved;
                 }

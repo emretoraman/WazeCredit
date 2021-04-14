@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using WazeCredit.Data.Repository;
+using WazeCredit.Data.Repository.Interfaces;
 using WazeCredit.Models;
 using WazeCredit.Services;
 using WazeCredit.Services.Lifetime;
@@ -32,6 +34,8 @@ namespace WazeCredit.Utility
                     _ => serviceProvider.GetService<CreditApprovedLow>(),
                 };
             });
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;
         }
