@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using WazeCredit.Data;
@@ -40,7 +41,7 @@ namespace WazeCredit.Controllers
             [FromServices] IOptions<TwilioSettings> twilioSettings,
             [FromServices] IOptions<SendGridSettings> sendGridSettings)
         {
-            List<string> settings = new List<string>
+            var settings = new List<string>
             {
                 $"WazeForecast.{nameof(WazeForecastSettings.ForecastTrackerEnabled)}: {wazeForecastSettings.Value.ForecastTrackerEnabled}",
                 $"Stripe.{nameof(StripeSettings.SecretKey)}: {stripeSettings.Value.SecretKey}",
@@ -64,7 +65,7 @@ namespace WazeCredit.Controllers
         [ValidateAntiForgeryToken]
         [HttpPost]
         [ActionName("CreditApplication")]
-        public IActionResult CreditApplicationPOST()
+        public IActionResult CreditApplicationPOST([FromServices] Func<CreditApprovedEnum, ICreditApproved> creditService)
         {
             if (ModelState.IsValid)
             {
@@ -78,9 +79,13 @@ namespace WazeCredit.Controllers
 
                 if (validationPassed)
                 {
+                    var creditApprovedEnum = CreditApplication.Salary > 50000 ? CreditApprovedEnum.High : CreditApprovedEnum.Low;
+                    CreditApplication.CreditApproved = creditService(creditApprovedEnum).GetCreditApproved(CreditApplication);
+
                     _dbContext.Add(CreditApplication);
                     _dbContext.SaveChanges();
                     creditResult.CreditID = CreditApplication.Id;
+                    creditResult.CreditApproved = CreditApplication.CreditApproved;
                 }
                 return RedirectToAction(nameof(CreditResult), creditResult);
             }

@@ -5,8 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 using WazeCredit.Data;
 using WazeCredit.Middleware;
+using WazeCredit.Models;
 using WazeCredit.Services;
 using WazeCredit.Services.Lifetime;
 using WazeCredit.Utility;
@@ -29,20 +31,35 @@ namespace WazeCredit
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddDatabaseDeveloperPageExceptionFilter();
+            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddControllersWithViews();
+
+            services.AddAppSettings(Configuration);
+
+            services.AddTransient<IMarketForecaster, MarketForecaster>();
+
+            services.AddTransient<TransientService>();
+            services.AddScoped<ScopedService>();
+            services.AddSingleton<SingletonService>();
 
             services.AddScoped<IValidationChecker, AddressValidationChecker>();
             services.AddScoped<IValidationChecker, CreditValidationChecker>();
             services.AddScoped<ICreditValidator, CreditValidator>();
 
-            services.AddTransient<IMarketForecaster, MarketForecaster>();
-            services.AddAppSettings(Configuration);
-            services.AddTransient<TransientService>();
-            services.AddScoped<ScopedService>();
-            services.AddSingleton<SingletonService>();
+            services.AddScoped<CreditApprovedHigh>();
+            services.AddScoped<CreditApprovedLow>();
 
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
-            services.AddControllersWithViews();
+            services.AddScoped<Func<CreditApprovedEnum, ICreditApproved>>(serviceProvider => range =>
+            {
+                return range switch
+                {
+                    CreditApprovedEnum.Low => serviceProvider.GetService<CreditApprovedLow>(),
+                    CreditApprovedEnum.High => serviceProvider.GetService<CreditApprovedHigh>(),
+                    _ => serviceProvider.GetService<CreditApprovedLow>(),
+                };
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
