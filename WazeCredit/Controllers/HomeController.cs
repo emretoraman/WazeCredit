@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Diagnostics;
+using WazeCredit.Data;
 using WazeCredit.Models;
 using WazeCredit.Models.ViewModels;
 using WazeCredit.Services;
@@ -13,14 +14,16 @@ namespace WazeCredit.Controllers
     {
         private readonly IMarketForecaster _marketForecaster;
         private readonly ICreditValidator _creditValidator;
+        private readonly ApplicationDbContext _dbContext;
         
         [BindProperty]
-        public CreditApplication CreditApplicationModel { get; set; }
+        public CreditApplication CreditApplication { get; set; }
 
-        public HomeController(IMarketForecaster marketForecaster, ICreditValidator creditValidator)
+        public HomeController(IMarketForecaster marketForecaster, ICreditValidator creditValidator, ApplicationDbContext dbContext)
         {
             _marketForecaster = marketForecaster;
             _creditValidator = creditValidator;
+            _dbContext = dbContext;
         }
 
         public IActionResult Index()
@@ -51,10 +54,11 @@ namespace WazeCredit.Controllers
             return View(settings);
         }
 
-        public IActionResult CreditApplication()
+        [ActionName("CreditApplication")]
+        public IActionResult CreditApplicationGET()
         {
-            CreditApplicationModel = new CreditApplication();
-            return View(CreditApplicationModel);
+            CreditApplication = new CreditApplication();
+            return View(CreditApplication);
         }
 
         [ValidateAntiForgeryToken]
@@ -64,7 +68,7 @@ namespace WazeCredit.Controllers
         {
             if (ModelState.IsValid)
             {
-                var (validationPassed, errorMessages) = _creditValidator.PassAllValidations(CreditApplicationModel);
+                var (validationPassed, errorMessages) = _creditValidator.PassAllValidations(CreditApplication);
                 var creditResult = new CreditResult
                 {
                     ErrorList = errorMessages,
@@ -74,11 +78,13 @@ namespace WazeCredit.Controllers
 
                 if (validationPassed)
                 {
-                    //todo: Add to DB
+                    _dbContext.Add(CreditApplication);
+                    _dbContext.SaveChanges();
+                    creditResult.CreditID = CreditApplication.Id;
                 }
                 return RedirectToAction(nameof(CreditResult), creditResult);
             }
-            return View(CreditApplicationModel);
+            return View(CreditApplication);
         }
 
         public IActionResult CreditResult(CreditResult creditResult)
