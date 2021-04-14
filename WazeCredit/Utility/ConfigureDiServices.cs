@@ -8,7 +8,7 @@ namespace WazeCredit.Utility
 {
     public static class ConfigureDiServices
     {
-        public static IServiceCollection AddDIServices(this IServiceCollection services)
+        public static IServiceCollection AddDiServices(this IServiceCollection services)
         {
             services.AddTransient<IMarketForecaster, MarketForecaster>();
 

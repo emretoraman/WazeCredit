@@ -33,7 +33,7 @@ namespace WazeCredit
             services.AddControllersWithViews();
 
             services.AddAppSettings(Configuration);
-            services.AddDIServices();
+            services.AddDiServices();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
