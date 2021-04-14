@@ -6,12 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
 using WazeCredit.Data;
 using WazeCredit.Middleware;
-using WazeCredit.Models;
-using WazeCredit.Services;
-using WazeCredit.Services.Lifetime;
 using WazeCredit.Utility;
 
 namespace WazeCredit
@@ -37,30 +33,7 @@ namespace WazeCredit
             services.AddControllersWithViews();
 
             services.AddAppSettings(Configuration);
-
-            services.AddTransient<IMarketForecaster, MarketForecaster>();
-
-            services.AddTransient<TransientService>();
-            services.AddScoped<ScopedService>();
-            services.AddSingleton<SingletonService>();
-
-            services.AddScoped<IValidationChecker, AddressValidationChecker>();
-            services.AddScoped<IValidationChecker, CreditValidationChecker>();
-            services.AddScoped<ICreditValidator, CreditValidator>();
-
-            services.AddScoped<CreditApprovedHigh>();
-            services.AddScoped<CreditApprovedLow>();
-
-            services.AddScoped<Func<CreditApprovedEnum, ICreditApproved>>(serviceProvider => range =>
-            {
-                return range switch
-                {
-                    CreditApprovedEnum.Low => serviceProvider.GetService<CreditApprovedLow>(),
-                    CreditApprovedEnum.High => serviceProvider.GetService<CreditApprovedHigh>(),
-                    _ => serviceProvider.GetService<CreditApprovedLow>(),
-                };
-            });
-
+            services.AddDIServices();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
