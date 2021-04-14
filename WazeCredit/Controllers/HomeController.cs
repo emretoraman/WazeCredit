@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -16,22 +17,30 @@ namespace WazeCredit.Controllers
         private readonly IMarketForecaster _marketForecaster;
         private readonly ICreditValidator _creditValidator;
         private readonly ApplicationDbContext _dbContext;
+        private readonly ILogger _logger;
         
         [BindProperty]
         public CreditApplication CreditApplication { get; set; }
 
-        public HomeController(IMarketForecaster marketForecaster, ICreditValidator creditValidator, ApplicationDbContext dbContext)
+        public HomeController(IMarketForecaster marketForecaster, 
+            ICreditValidator creditValidator, 
+            ApplicationDbContext dbContext,
+            ILogger<HomeController> logger)
         {
             _marketForecaster = marketForecaster;
             _creditValidator = creditValidator;
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         public IActionResult Index()
         {
-            var marketCondition = _marketForecaster.GetMarketPrediction().MarketCondition.ToString();
+            _logger.LogInformation("HomeController Index action called");
 
+            var marketCondition = _marketForecaster.GetMarketPrediction().MarketCondition.ToString();
             var homeVM = new HomeViewModel { MarketForecast = $"Market is {marketCondition}" };
+
+            _logger.LogInformation("HomeController Index action ended");
             return View(homeVM);
         }
 
